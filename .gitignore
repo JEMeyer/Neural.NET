@@ -281,3 +281,4 @@ __pycache__/
 # tools/**
 # !tools/packages.config
 *.exe
+/Package.nuspec

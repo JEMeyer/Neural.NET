@@ -31,8 +31,8 @@ namespace Neural.NET
 
             // Initialize the size of our arrays
             this.NodesPerLayer = new int[this.LayerCount + 1];
-            this.VectorBiases = new Vector<double>[this.LayerCount];
-            this.MatrixWeights = new Matrix<double>[this.LayerCount];
+            this._biases = new Vector<double>[this.LayerCount];
+            this._weights = new Matrix<double>[this.LayerCount];
 
             // Fill our NumberOfNodes array
             this.NodesPerLayer[0] = this.InputNodeCount;
@@ -45,8 +45,8 @@ namespace Neural.NET
             // Need to randomly make a list of vectors for biases and weights. One between each layer.
             for (int i = 0; i < this.LayerCount; i++)
             {
-                this.VectorBiases[i] = Vector<double>.Build.Random(this.NodesPerLayer[i + 1], new Normal(0.0, 1.0));
-                this.MatrixWeights[i] = Matrix<double>.Build.Random(this.NodesPerLayer[i + 1], this.NodesPerLayer[i], new Normal(0.0, 1.0));
+                this._biases[i] = Vector<double>.Build.Random(this.NodesPerLayer[i + 1], new Normal(0.0, 1.0));
+                this._weights[i] = Matrix<double>.Build.Random(this.NodesPerLayer[i + 1], this.NodesPerLayer[i], new Normal(0.0, 1.0));
             }
         }
 
@@ -57,10 +57,10 @@ namespace Neural.NET
         {
             get
             {
-                double[][] _tempBiases = new double[this.VectorBiases.Length][];
+                double[][] _tempBiases = new double[this._biases.Length][];
                 for (int i = 0; i < _tempBiases.Length; i++)
                 {
-                    _tempBiases[i] = this.VectorBiases[i].ToArray();
+                    _tempBiases[i] = this._biases[i].ToArray();
                 }
                 return _tempBiases;
             }
@@ -79,7 +79,7 @@ namespace Neural.NET
         /// <summary>
         /// Gets or sets the matrix array holding all weights in our network
         /// </summary>
-        public Matrix<double>[] MatrixWeights { get; set; }
+        internal Matrix<double>[] _weights { get; set; }
 
         /// <summary>
         /// Gets or sets an array that holds how many nodes are in each layer
@@ -94,7 +94,7 @@ namespace Neural.NET
         /// <summary>
         /// Gets or sets the vector array holding all biases in our network
         /// </summary>
-        public Vector<double>[] VectorBiases { get; set; }
+        internal Vector<double>[] _biases { get; set; }
 
         /// <summary>
         /// Gets the public getter for weights so the consumer does not need to have mathnet numerics as a dependency.
@@ -103,10 +103,10 @@ namespace Neural.NET
         {
             get
             {
-                double[][,] _tempWeights = new double[this.MatrixWeights.Length][,];
+                double[][,] _tempWeights = new double[this._weights.Length][,];
                 for (int i = 0; i < _tempWeights.Length; i++)
                 {
-                    _tempWeights[i] = this.MatrixWeights[i].ToArray();
+                    _tempWeights[i] = this._weights[i].ToArray();
                 }
                 return _tempWeights;
             }
@@ -122,7 +122,7 @@ namespace Neural.NET
             Vector<double> _activation = Vector<double>.Build.DenseOfArray(activation);
             for (int i = 0; i < this.LayerCount; i++)
             {
-                _activation = this.Sigmoid(this.MatrixWeights[i].Multiply(_activation).Add(this.VectorBiases[i]));
+                _activation = this.Sigmoid(this._weights[i].Multiply(_activation).Add(this._biases[i]));
             }
 
             return _activation.MaximumIndex();

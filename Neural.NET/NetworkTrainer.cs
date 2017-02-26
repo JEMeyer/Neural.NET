@@ -119,7 +119,7 @@ namespace Neural.NET
             // Take each activation, multiply weights and add bias, then sigmoid it
             for (int i = 0; i < this.Network.LayerCount; i++)
             {
-                activation = this.Sigmoid(this.Network.MatrixWeights[i].Multiply(activation).Add(this.Network.VectorBiases[i]));
+                activation = this.Sigmoid(this.Network._weights[i].Multiply(activation).Add(this.Network._biases[i]));
             }
 
             return activation;
@@ -152,19 +152,19 @@ namespace Neural.NET
         /// <param name="learningRate">The learning rate to use when training.</param>
         private void UpdateMiniBatch(Tuple<Vector<double>, Vector<double>>[] batch, double learningRate)
         {
-            Vector<double>[] _nablaB = new Vector<double>[this.Network.VectorBiases.Length];
-            Matrix<double>[] _nablaW = new Matrix<double>[this.Network.MatrixWeights.Length];
+            Vector<double>[] _nablaB = new Vector<double>[this.Network._biases.Length];
+            Matrix<double>[] _nablaW = new Matrix<double>[this.Network._weights.Length];
 
             // Build weight nabla (del) with Zeroes
-            for (int i = 0; i < this.Network.VectorBiases.Length; i++)
+            for (int i = 0; i < this.Network._biases.Length; i++)
             {
-                _nablaB[i] = Vector<double>.Build.Sparse(this.Network.VectorBiases[i].Count, 0);
+                _nablaB[i] = Vector<double>.Build.Sparse(this.Network._biases[i].Count, 0);
             }
 
             // Do same for weights
-            for (int i = 0; i < this.Network.MatrixWeights.Length; i++)
+            for (int i = 0; i < this.Network._weights.Length; i++)
             {
-                _nablaW[i] = Matrix<double>.Build.Sparse(this.Network.MatrixWeights[i].RowCount, this.Network.MatrixWeights[i].ColumnCount, 0);
+                _nablaW[i] = Matrix<double>.Build.Sparse(this.Network._weights[i].RowCount, this.Network._weights[i].ColumnCount, 0);
             }
 
             // We get the delta for each pair in the batch, but don't update the network's weights and biases until after the whole batch is complete.
@@ -194,12 +194,12 @@ namespace Neural.NET
             // Update the biases and weights based on the del/nabla values from the back propogation function
             for (int i = 0; i < this.Network.LayerCount; i++)
             {
-                this.Network.MatrixWeights[i] = this.Network.MatrixWeights[i].Subtract(_nablaW[i].Multiply(learningRate / batch.Length));
+                this.Network._weights[i] = this.Network._weights[i].Subtract(_nablaW[i].Multiply(learningRate / batch.Length));
             }
 
             for (int i = 0; i < this.Network.LayerCount; i++)
             {
-                this.Network.VectorBiases[i] = this.Network.VectorBiases[i].Subtract(_nablaB[i].Multiply(learningRate / batch.Length));
+                this.Network._biases[i] = this.Network._biases[i].Subtract(_nablaB[i].Multiply(learningRate / batch.Length));
             }
         }
 
@@ -211,8 +211,8 @@ namespace Neural.NET
         /// <param name="output">Output.</param>
         private Tuple<Vector<double>[], Matrix<double>[]> BackPropogation(Vector<double> input, Vector<double> expectedOutput)
         {
-            Vector<double>[] _nablaB = new Vector<double>[this.Network.VectorBiases.Length];
-            Matrix<double>[] _nablaW = new Matrix<double>[this.Network.MatrixWeights.Length];
+            Vector<double>[] _nablaB = new Vector<double>[this.Network._biases.Length];
+            Matrix<double>[] _nablaW = new Matrix<double>[this.Network._weights.Length];
 
             // Feed forward
             Vector<double> _activation = input;
@@ -227,7 +227,7 @@ namespace Neural.NET
             // Loop through all layers, store off values before and after sigmoid function. This is basically a feed forward run of the network with the values getting stored off for correction later
             for (int i = 0; i < this.Network.LayerCount; i++)
             {
-                Vector<double> _z = this.Network.MatrixWeights[i].Multiply(_activation).Add(this.Network.VectorBiases[i]);
+                Vector<double> _z = this.Network._weights[i].Multiply(_activation).Add(this.Network._biases[i]);
                 _zOutputs.Add(_z);
                 _activation = this.Sigmoid(_z);
                 _activations.Add(_activation);
@@ -242,13 +242,13 @@ namespace Neural.NET
             // Start the loop counting backwards, doing the exact same algorithm we did above for all middle layers
             for (int i = this.Network.LayerCount - 2; i > 0; i--)
             {
-                _delta = this.Network.MatrixWeights[i + 1].TransposeThisAndMultiply(_delta).PointwiseMultiply(this.Sigmoid(_zOutputs[i], true));
+                _delta = this.Network._weights[i + 1].TransposeThisAndMultiply(_delta).PointwiseMultiply(this.Sigmoid(_zOutputs[i], true));
                 _nablaB[i] = _delta;
                 _nablaW[i] = _delta.ToColumnMatrix().TransposeAndMultiply(_activations[i].ToColumnMatrix());
             }
 
             // Do last layer
-            _delta = this.Network.MatrixWeights[1].TransposeThisAndMultiply(_delta).PointwiseMultiply(this.Sigmoid(_zOutputs[0], true));
+            _delta = this.Network._weights[1].TransposeThisAndMultiply(_delta).PointwiseMultiply(this.Sigmoid(_zOutputs[0], true));
             _nablaB[0] = _delta;
             _nablaW[0] = _delta.ToColumnMatrix().TransposeAndMultiply(_activations[0].ToColumnMatrix());
 

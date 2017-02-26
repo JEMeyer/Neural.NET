@@ -11,7 +11,7 @@ namespace Neural.NET
     /// <summary>
     /// Class used to hold extension methods of the 'Random' class used by the network.
     /// </summary>
-    public static class RandomExtensions
+    internal static class RandomExtensions
     {
         /// <summary>
         /// Shuffles an array of values in O(n) time.
