@@ -1,7 +1,0 @@
-D:\Projects\Libraries\Neural.NET\Neural.NET\bin\Debug\Neural.NET.dll
-D:\Projects\Libraries\Neural.NET\Neural.NET\bin\Debug\Neural.NET.pdb
-D:\Projects\Libraries\Neural.NET\Neural.NET\bin\Debug\MathNet.Numerics.dll
-D:\Projects\Libraries\Neural.NET\Neural.NET\bin\Debug\MathNet.Numerics.xml
-D:\Projects\Libraries\Neural.NET\Neural.NET\obj\Debug\Neural.NET.csprojResolveAssemblyReference.cache
-D:\Projects\Libraries\Neural.NET\Neural.NET\obj\Debug\Neural.NET.dll
-D:\Projects\Libraries\Neural.NET\Neural.NET\obj\Debug\Neural.NET.pdb
