@@ -36,6 +36,7 @@ Here is a typical TestRunner constructor:
 The training function function is called StochasticGradientDescent. This readme will update with any extra learning algorithms used and how to implemenet them.
 
 StochasticGradientDescent takes in 5 parameters:
+
     - An array of the training data and labels (as double arrays)
     - The numer of epochs or iterations for which to train (as an int)
     - The size of the mini batches for which to train (as an int - please use an even divisor compared to the number of training
