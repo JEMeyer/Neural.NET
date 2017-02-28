@@ -37,7 +37,7 @@ The training function function is called StochasticGradientDescent. This readme 
 StochasticGradientDescent takes in 5 parameters:
 
     - The number of training data to use each epoch (as an int)
-    - An array of the training data and labels (as double arrays)
+    - An array of the training data and labels (as double array Tuples)
     - The numer of epochs or iterations for which to train (as an int)
     - Training mini batch size (as an int - an even divisor of training data count)
     - The learning rate (as a double). I recommend starting this around .02-.05
