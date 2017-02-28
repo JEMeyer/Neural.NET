@@ -53,11 +53,7 @@ NetworkTrainer _networkTrainer = new NetworkTrainter(_network);
 Tupple<double[], double[]> _testData = GetTestData();
 Tupple<double[], double[]> _trainingData = GetTrainingData();
 foreach (Tuple<int, double?> _result in _trainer.StochasticGradientDescent(
-    _trainingData,
-    1000, // epochs
-    100, // miniBatchSize
-    .05, // learningRate
-    _testingData))
+    _trainingData, 1000, 100, .05, _testingData))
 {
     Console.WriteLine($"Epoch {_result.Item1}: {_result.Item2}%");
 }
