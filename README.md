@@ -39,7 +39,7 @@ StochasticGradientDescent takes in 5 parameters:
 
     - An array of the training data and labels (as double arrays)
     - The numer of epochs or iterations for which to train (as an int)
-    - The size of the mini batches for which to train (as an int - please use an even divisor compared to the number of training
+    - Training mini batch size (as an int - an even divisor of training data count)
     The learning rate (as a double). I recommend starting this around .02-.05
     - The testing data (optional - same array type as training data)
 
@@ -52,7 +52,12 @@ Network _network = new Network(784, new[] { 100, 50 }, 10);
 NetworkTrainer _networkTrainer = new NetworkTrainter(_network);
 Tupple<double[], double[]> _testData = GetTestData();
 Tupple<double[], double[]> _trainingData = GetTrainingData();
-foreach (Tuple<int, double?> _result in _trainer.StochasticGradientDescent(_trainingData, 1000, 100, .05, _testingData))
+foreach (Tuple<int, double?> _result in _trainer.StochasticGradientDescent(
+    _trainingData,
+    1000, // epochs
+    100, // miniBatchSize
+    .05, // learningRate
+    _testingData))
 {
     Console.WriteLine($"Epoch {_result.Item1}: {_result.Item2}%");
 }
