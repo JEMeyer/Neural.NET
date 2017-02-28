@@ -58,3 +58,9 @@ foreach (Tuple<int, double?> _result in _trainer.StochasticGradientDescent(_trai
 ```
 
 I hope this is enough to get started. I'll try to keep this up to date while I push out newer Nuget packages. Even if the repo is slightly different I'll end up updating this for the 'bigger' releases.
+
+Once you get the network trained, you can serialize and store it to keep your training progress. Whenever you deserialize, simply use 
+```sh
+_network.FeedForward(double[] newInput);
+```
+in order to have your trained network start making predictions.
