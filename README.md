@@ -36,17 +36,14 @@ The training function function is called StochasticGradientDescent. This readme 
 
 StochasticGradientDescent takes in 5 parameters:
 
+    - The number of training data to use each epoch (as an int)
     - An array of the training data and labels (as double arrays)
     - The numer of epochs or iterations for which to train (as an int)
     - Training mini batch size (as an int - an even divisor of training data count)
     - The learning rate (as a double). I recommend starting this around .02-.05
     - The testing data (optional - same array type as training data)
-    
-##### NOTE: These are the parameters for the nuget package. Please look at current code for any changes. As of now this includes adding number of training images to train on each batch. Now you can pass in all images you could potentially train against (60k) but only train against a random subset each epoch. This will help with any overfitting from a small number of training images.
 
-This function will yield a tuple whenever an epoch finishes. That is, when it runs through every training image once, adjusts for error, and then runs through the testing data to report how well it is doing. The tuple will be a pair of of an int (the epoch number) with a double (the success rate of that epoch against the testing data).
-
-##### NOTE: These are the return values for the nuget package. The current repository has the double value be the error rate, not the success rate.
+This function will yield a tuple whenever an epoch finishes. That is, when it runs through every training image once, adjusts for error, and then runs through the testing data to report how well it is doing. The tuple will be a pair of of an int (the epoch number) with a double (the error rate of that epoch against the testing data).
 
 Hopefully this allows you to get up and running. Putting it all together, you would be able to create and train a network with these steps:
 
