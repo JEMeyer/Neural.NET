@@ -1,8 +1,7 @@
 # Neural.NET
 .NET libarary used to implement and train neural networks using C#
 
-For a full demo, including how to package MNIST data for the network, this repo shows usage of the library: https://github.com/JEMeyer/Neural.NET-MNIST
-* Look at the TestRunner.cs file
+For a full demo, including how to package MNIST data for the network, this repo shows usage of the library: https://github.com/JEMeyer/MNIST-Neural.NET
 
 # Basic usage
 ## Creating the network
