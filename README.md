@@ -40,7 +40,7 @@ StochasticGradientDescent takes in 5 parameters:
     - An array of the training data and labels (as double arrays)
     - The numer of epochs or iterations for which to train (as an int)
     - Training mini batch size (as an int - an even divisor of training data count)
-    The learning rate (as a double). I recommend starting this around .02-.05
+    - The learning rate (as a double). I recommend starting this around .02-.05
     - The testing data (optional - same array type as training data)
     
 ##### NOTE: These are the parameters for the nuget package. Please look at current code for any changes. As of now this includes adding number of training images to train on each batch. Now you can pass in all images you could potentially train against (60k) but only train against a random subset each epoch. This will help with any overfitting from a small number of training images.
