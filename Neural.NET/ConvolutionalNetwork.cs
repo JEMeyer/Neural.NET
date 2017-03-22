@@ -203,11 +203,12 @@ namespace Neural.NET
         private Matrix<double> CreateMaskingMap(int filterSideLength, int strideSize, Vector<double> startingImage)
         {
             int _imageSideDimension = (int)Math.Sqrt(startingImage.Count);
-            Matrix<double> _result = CreateMatrix.Dense<double>((int)Math.Pow(filterSideLength, 2), (int)Math.Pow(_imageSideDimension - filterSideLength + 1, 2));
+            int _endingImageSideDimension = (_imageSideDimension - filterSideLength) / strideSize + 1;
+            Matrix<double> _result = CreateMatrix.Dense<double>((int)Math.Pow(filterSideLength, 2), (int)Math.Pow(_endingImageSideDimension, 2));
 
-            for (int i = 0; i < _imageSideDimension - filterSideLength + 1; i += strideSize)
+            for (int i = 0; i < _endingImageSideDimension; i += strideSize)
             {
-                for (int j = 0; j < _imageSideDimension - filterSideLength + 1; j += strideSize)
+                for (int j = 0; j < _endingImageSideDimension; j += strideSize)
                 {
                     int _arrayIndex = i * _imageSideDimension + j;
                     Vector<double> _dataPatch = Vector<double>.Build.Sparse((int)Math.Pow(filterSideLength, 2));
@@ -257,13 +258,11 @@ namespace Neural.NET
         private Matrix<double> Pool(PoolingLayerInformation layerInfo, Matrix<double> inputImages)
         {
             Matrix<double> _preConvolutionMap = null;
-            Matrix<double> _outputImages = CreateMatrix.Dense<double>(inputImages.RowCount, (int)Math.Pow(Math.Sqrt(inputImages.ColumnCount) - layerInfo.SideLength + 1, 2));
+            Matrix<double> _outputImages = CreateMatrix.Dense<double>(inputImages.RowCount, (int)Math.Pow((Math.Sqrt(inputImages.ColumnCount) - layerInfo.SideLength) / layerInfo.Stride + 1, 2));
 
             for (int i = 0; i < inputImages.RowCount; i++)
             {
                 _preConvolutionMap = this.CreateMaskingMap(layerInfo.SideLength, layerInfo.Stride, inputImages.Row(i));
-
-                Vector<double> _pooledImage = _preConvolutionMap.ColumnNorms(double.PositiveInfinity);
 
                 switch (layerInfo.PoolingType)
                 {
