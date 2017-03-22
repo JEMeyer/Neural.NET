@@ -15,6 +15,7 @@ namespace Neural.NET
         /// Applies the sigmoid function to all elements of a vector
         /// </summary>
         /// <param name="vector">The vector holding the values to run the sigmoid operation on.</param>
+        /// <param name="derivative">Whether we want the derivative</param>
         /// <returns>A vector with the sigmoid operation ran on all values.</returns>
         internal static Vector<double> Sigmoid(Vector<double> vector, bool derivative = false)
         {
@@ -32,9 +33,10 @@ namespace Neural.NET
         }
 
         /// <summary>
-        /// Applies the sigmoid function to all elements of a vector
+        /// Applies the sigmoid function to all elements of a matrix
         /// </summary>
         /// <param name="vector">The vector holding the values to run the sigmoid operation on.</param>
+        /// <param name="derivative">Whether we want the derivative</param>
         /// <returns>A vector with the sigmoid operation ran on all values.</returns>
         internal static Matrix<double> Sigmoid(Matrix<double> matrix, bool derivative = false)
         {
@@ -46,8 +48,47 @@ namespace Neural.NET
             }
             else
             {
-                //vector.Map(x => ((1.0 / (1.0 + Math.Exp(-x))) * (1 - (1.0 / (1.0 + Math.Exp(-x))))), Zeros.Include) :
                 return matrix.Map(x => (1.0 / (1.0 + Math.Exp(-x))), Zeros.Include);
+            }
+        }
+
+        /// <summary>
+        /// Applies the tanh function to all elements of a vactor
+        /// </summary>
+        /// <param name="vector">The vector holding the values to run the tanh operation on.</param>
+        /// <param name="derivative">Whether we want the derivative</param>
+        /// <returns>A vector with the tanh operation ran on all values.</returns>
+        internal static Vector<double> Tanh(Vector<double> vector, bool derivative = false)
+        {
+            // Tanh is provided in the libary. The derivative is 1 - tanh(x)^2
+            if (derivative)
+            {
+                Vector<double> _tanh = vector.PointwiseTanh();
+                return _tanh.PointwisePower(2).SubtractFrom(1);
+            }
+            else
+            {
+                return vector.PointwiseTanh();
+            }
+        }
+
+        /// <summary>
+        /// Applies the tanh function to all elements of a matrix
+        /// </summary>
+        /// <param name="vector">The vector holding the values to run the tanh operation on.</param>
+        /// <param name="derivative">Whether we want the derivative</param>
+        /// <returns>A vector with the tanh operation ran on all values.</returns>
+        internal static Matrix<double> Tanh(Matrix<double> matrix, bool derivative = false)
+        {
+            // Tanh is provided in the libary. The derivative is 1 - tanh(x)^2
+            if (derivative)
+            {
+                Matrix<double> _tanh = matrix.PointwiseTanh();
+                return _tanh.PointwisePower(2).SubtractFrom(1);
+            }
+            else
+            {
+                return matrix.PointwiseTanh();
             }
         }
     }

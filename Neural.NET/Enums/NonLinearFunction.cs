@@ -19,6 +19,11 @@ namespace Neural.NET.Enums
         /// <summary>
         /// The sigmoid function is used as the non-linear function
         /// </summary>
-        Sigmoid = 1
+        Sigmoid = 1,
+
+        /// <summary>
+        /// The tanh function is used as the non-linear function
+        /// </summary>
+        Tanh = 2
     }
 }

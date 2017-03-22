@@ -242,6 +242,9 @@ namespace Neural.NET
                 case NonLinearFunction.Sigmoid:
                     return NonLinearTransformations.Sigmoid(inputImages);
 
+                case NonLinearFunction.Tanh:
+                    return NonLinearTransformations.Tanh(inputImages);
+
                 default:
                     return null;
             }
