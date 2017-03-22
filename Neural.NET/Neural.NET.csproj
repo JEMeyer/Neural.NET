@@ -46,8 +46,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Network.cs" />
+    <Compile Include="ConvolutionalNetwork.cs" />
+    <Compile Include="Enums\NonLinearFunction.cs" />
+    <Compile Include="Enums\PoolingType.cs" />
+    <Compile Include="FullyConnectedNetwork.cs" />
+    <Compile Include="LayerInformation\ConvolutionalLayerInformation.cs" />
+    <Compile Include="LayerInformation\FullyConnectedLayerInformation.cs" />
+    <Compile Include="LayerInformation\ILayerInformation.cs" />
+    <Compile Include="LayerInformation\NonLinearLayerInformation.cs" />
+    <Compile Include="LayerInformation\PoolingLayerInformation.cs" />
+    <Compile Include="Enums\LayerType.cs" />
     <Compile Include="NetworkTrainer.cs" />
+    <Compile Include="NonLinearTransformations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RandomExtensions.cs" />
   </ItemGroup>

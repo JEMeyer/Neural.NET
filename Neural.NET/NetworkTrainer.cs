@@ -1,21 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using MathNet.Numerics.LinearAlgebra;
+﻿//-----------------------------------------------------------------------
+// <copyright file="Network.cs" company="Joseph Meyer (Individual)">
+//     Copyright (c) Joseph Meyer. All rights reserved.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace Neural.NET
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using MathNet.Numerics.LinearAlgebra;
+
     /// <summary>
     /// The class that is used to train a network.
     /// </summary>
     public class NetworkTrainer
     {
         /// <summary>
-        /// Constructs a new instance of the NetworkTrainer class that will be used to train the given network.
+        /// Constructs a new instance of the NetworkTrainer class that will be used to train the
+        /// given network.
         /// </summary>
         /// <param name="network">The network to train.</param>
-        public NetworkTrainer(Network network)
+        public NetworkTrainer(FullyConnectedNetwork network)
         {
             this.Network = network;
         }
@@ -28,16 +34,21 @@ namespace Neural.NET
         /// <summary>
         /// Gets or sets the private network that this trainer is currently training.
         /// </summary>
-        private Network Network { get; set; }
+        private FullyConnectedNetwork Network { get; set; }
 
         /// <summary>
         /// Train the neural network using mini-batch stochastic gradient descent.
         /// </summary>
-        /// <param name="trainingData">A list of tuples "(x, y)" representing the training inputs and the desired outputs.</param>
+        /// <param name="trainingData">
+        /// A list of tuples "(x, y)" representing the training inputs and the desired outputs.
+        /// </param>
         /// <param name="epochs">How many iterations will this net run for.</param>
         /// <param name="miniBatchSize">How many input sets will be fed in for each epoch.</param>
         /// <param name="learningRate">The learning rate of the net.</param>
-        /// <param name="testData">If "test_data" is provided then the network will be evaluated against the test data after each epoch, and partial progress printed out.</param>
+        /// <param name="testData">
+        /// If "test_data" is provided then the network will be evaluated against the test data after
+        /// each epoch, and partial progress printed out.
+        /// </param>
         public IEnumerable<Tuple<int, double?>> StochasticGradientDescent(int trainingSize, Tuple<double[], double[]>[] trainingData, int epochs, int miniBatchSize, double learningRate, Tuple<double[], double[]>[] testData = null)
         {
             // Convert the double array into something a we like more (vectors)
@@ -75,7 +86,8 @@ namespace Neural.NET
                 new Random().Shuffle(_trainingData);
                 Tuple<Vector<double>, Vector<double>>[][] _batches = new Tuple<Vector<double>, Vector<double>>[trainingSize / miniBatchSize][];
 
-                // We need to initialize the tuples to be actual arrays in order for Array.Copy to not throw an argument null exception
+                // We need to initialize the tuples to be actual arrays in order for Array.Copy to
+                // not throw an argument null exception
                 for (int j = 0; j < _batches.Length; j++)
                 {
                     _batches[j] = new Tuple<Vector<double>, Vector<double>>[miniBatchSize];
@@ -85,17 +97,21 @@ namespace Neural.NET
                 int _batchesCounter = 0;
                 for (int j = 0; j < trainingSize; j += miniBatchSize)
                 {
-                    // Copies from j to j + miniBatchSet of the training data and puts this array into the _batchCounter-th array of _batches
+                    // Copies from j to j + miniBatchSet of the training data and puts this array
+                    // into the _batchCounter-th array of _batches
                     Array.Copy(_trainingData, j, _batches[_batchesCounter++], 0, miniBatchSize);
                 }
 
-                // This is the actual updating code. For each batch it will run through all images in the batch and then take the average error to update weights
+                // This is the actual updating code. For each batch it will run through all images in
+                // the batch and then take the average error to update weights
                 foreach (Tuple<Vector<double>, Vector<double>>[] _batch in _batches)
                 {
                     this.UpdateMiniBatch(_batch, learningRate);
                 }
 
-                // If we have test data, run through that now and yield the results as well as what epoch we are on. If no test data exists, return null for the double (percentage) of error so they still can get what epoch they are on.
+                // If we have test data, run through that now and yield the results as well as what
+                // epoch we are on. If no test data exists, return null for the double (percentage)
+                // of error so they still can get what epoch they are on.
                 if (_testData != null)
                 {
                     yield return new Tuple<int, double?>(i, (1 - this.Evaluate(_testData) / _sizeOfTest) * 100);
@@ -115,8 +131,8 @@ namespace Neural.NET
         /// <param name="output">Output.</param>
         private Tuple<Vector<double>[], Matrix<double>[]> BackPropogation(Vector<double> input, Vector<double> expectedOutput)
         {
-            Vector<double>[] _nablaB = new Vector<double>[this.Network.Biases.Length];
-            Matrix<double>[] _nablaW = new Matrix<double>[this.Network.Weights.Length];
+            Vector<double>[] _nablaB = new Vector<double>[this.Network.Biases.Count];
+            Matrix<double>[] _nablaW = new Matrix<double>[this.Network.Weights.Count];
 
             // Feed forward
             Vector<double> _activation = input;
@@ -128,31 +144,35 @@ namespace Neural.NET
             // Store all the z vectors (outputs of each layer before running sigmoid)
             List<Vector<double>> _zOutputs = new List<Vector<double>>(this.Network.LayerCount);
 
-            // Loop through all layers, store off values before and after sigmoid function. This is basically a feed forward run of the network with the values getting stored off for correction later
+            // Loop through all layers, store off values before and after sigmoid function. This is
+            // basically a feed forward run of the network with the values getting stored off for
+            // correction later
             for (int i = 0; i < this.Network.LayerCount; i++)
             {
                 Vector<double> _z = this.Network.Weights[i].Multiply(_activation).Add(this.Network.Biases[i]);
                 _zOutputs.Add(_z);
-                _activation = this.Sigmoid(_z);
+                _activation = NonLinearTransformations.Sigmoid(_z);
                 _activations.Add(_activation);
             }
 
-            // Now to run through the network backwards instead of forward in order to do the correction
-            // Since activations also holds the very first layer, it actually has layerCount + 1 entries, so last is layercount, second to last is layercount - 1
-            Vector<double> _delta = this.CostDerivative(_activations[this.Network.LayerCount], expectedOutput).PointwiseMultiply(this.Sigmoid(_zOutputs.Last(), true));
+            // Now to run through the network backwards instead of forward in order to do the
+            // correction Since activations also holds the very first layer, it actually has
+            // layerCount + 1 entries, so last is layercount, second to last is layercount - 1
+            Vector<double> _delta = this.CostDerivative(_activations[this.Network.LayerCount], expectedOutput).PointwiseMultiply(NonLinearTransformations.Sigmoid(_zOutputs.Last(), true));
             _nablaB[this.Network.LayerCount - 1] = _delta;
             _nablaW[this.Network.LayerCount - 1] = _delta.ToColumnMatrix().TransposeAndMultiply(_activations[this.Network.LayerCount - 1].ToColumnMatrix());
 
-            // Start the loop counting backwards, doing the exact same algorithm we did above for all middle layers
+            // Start the loop counting backwards, doing the exact same algorithm we did above for all
+            // middle layers
             for (int i = this.Network.LayerCount - 2; i > 0; i--)
             {
-                _delta = this.Network.Weights[i + 1].TransposeThisAndMultiply(_delta).PointwiseMultiply(this.Sigmoid(_zOutputs[i], true));
+                _delta = this.Network.Weights[i + 1].TransposeThisAndMultiply(_delta).PointwiseMultiply(NonLinearTransformations.Sigmoid(_zOutputs[i], true));
                 _nablaB[i] = _delta;
                 _nablaW[i] = _delta.ToColumnMatrix().TransposeAndMultiply(_activations[i].ToColumnMatrix());
             }
 
             // Do last layer
-            _delta = this.Network.Weights[1].TransposeThisAndMultiply(_delta).PointwiseMultiply(this.Sigmoid(_zOutputs[0], true));
+            _delta = this.Network.Weights[1].TransposeThisAndMultiply(_delta).PointwiseMultiply(NonLinearTransformations.Sigmoid(_zOutputs[0], true));
             _nablaB[0] = _delta;
             _nablaW[0] = _delta.ToColumnMatrix().TransposeAndMultiply(_activations[0].ToColumnMatrix());
 
@@ -160,7 +180,8 @@ namespace Neural.NET
         }
 
         /// <summary>
-        /// Simply performs the cost derivative. Is given a vector and what it should have been, and subtracts them.
+        /// Simply performs the cost derivative. Is given a vector and what it should have been, and
+        /// subtracts them.
         /// </summary>
         /// <param name="actual">The actual value out of a layer.</param>
         /// <param name="expected">The expected value of that layer.</param>
@@ -177,21 +198,25 @@ namespace Neural.NET
         /// <param name="testData">Test data to run through the network.</param>
         private double Evaluate(Tuple<Vector<double>, Vector<double>>[] testData)
         {
-            // Building this list will help us later so we can run through all the test data at once, and then see how it compated to actual results
+            // Building this list will help us later so we can run through all the test data at once,
+            // and then see how it compated to actual results
             List<Tuple<int, int>> _testResults = new List<Tuple<int, int>>(testData.Length);
 
             foreach (Tuple<Vector<double>, Vector<double>> _singleRun in testData)
             {
-                // For each run we store off the maximum index of what the network thought was the answer, as well as the actual answer
+                // For each run we store off the maximum index of what the network thought was the
+                // answer, as well as the actual answer
                 _testResults.Add(new Tuple<int, int>(this.FeedForward(_singleRun.Item1).MaximumIndex(), _singleRun.Item2.MaximumIndex()));
             }
 
-            // We return back the count of how many were correct. This is a double so we can make it a percentage easier.
+            // We return back the count of how many were correct. This is a double so we can make it
+            // a percentage easier.
             return _testResults.Where(a => a.Item1 == a.Item2).Count();
         }
 
         /// <summary>
-        /// Pass in the features to the NN. These are considered the 'activations' for the first layer of the net
+        /// Pass in the features to the NN. These are considered the 'activations' for the first
+        /// layer of the net
         /// </summary>
         /// <param name="activation">The values for the input layer.</param>
         /// <returns>A vector to give to the next layer of the net.</returns>
@@ -200,49 +225,38 @@ namespace Neural.NET
             // Take each activation, multiply weights and add bias, then sigmoid it
             for (int i = 0; i < this.Network.LayerCount; i++)
             {
-                activation = this.Sigmoid(this.Network.Weights[i].Multiply(activation).Add(this.Network.Biases[i]));
+                activation = NonLinearTransformations.Sigmoid(this.Network.Weights[i].Multiply(activation).Add(this.Network.Biases[i]));
             }
 
             return activation;
         }
 
         /// <summary>
-        /// Applies the sigmoid function to all elements of a vector
-        /// </summary>
-        /// <param name="vector">The vector holding the values to run the sigmoid operation on.</param>
-        /// <returns>A vector with the sigmoid operation ran on all values.</returns>
-        private Vector<double> Sigmoid(Vector<double> vector, bool derivative = false)
-        {
-            // Sigmoid(x) is 1 / (1 + e^-x). The derivative is Sigmoid(x) * (1 - Sigmoid(x))
-            return derivative ?
-                vector.Map(x => ((1.0 / (1.0 + Math.Exp(-x))) * (1 - (1.0 / (1.0 + Math.Exp(-x))))), Zeros.Include) :
-                vector.Map(x => (1.0 / (1.0 + Math.Exp(-x))), Zeros.Include);
-        }
-
-        /// <summary>
-        /// Update the network's weights and biases by applying gradient descent using backpropagation to a single mini batch.
+        /// Update the network's weights and biases by applying gradient descent using
+        /// backpropagation to a single mini batch.
         /// </summary>
         /// <param name="batch">An array of tuples represeting an image and it's classification.</param>
         /// <param name="learningRate">The learning rate to use when training.</param>
         private void UpdateMiniBatch(Tuple<Vector<double>, Vector<double>>[] batch, double learningRate)
         {
-            Vector<double>[] _nablaB = new Vector<double>[this.Network.Biases.Length];
-            Matrix<double>[] _nablaW = new Matrix<double>[this.Network.Weights.Length];
+            Vector<double>[] _nablaB = new Vector<double>[this.Network.Biases.Count];
+            Matrix<double>[] _nablaW = new Matrix<double>[this.Network.Weights.Count];
 
             // Build weight nabla (del) with Zeroes
-            for (int i = 0; i < this.Network.Biases.Length; i++)
+            for (int i = 0; i < this.Network.Biases.Count; i++)
             {
                 _nablaB[i] = Vector<double>.Build.Sparse(this.Network.Biases[i].Count, 0);
             }
 
             // Do same for weights
-            for (int i = 0; i < this.Network.Weights.Length; i++)
+            for (int i = 0; i < this.Network.Weights.Count; i++)
             {
                 _nablaW[i] = Matrix<double>.Build.Sparse(this.Network.Weights[i].RowCount, this.Network.Weights[i].ColumnCount, 0);
             }
 
-            // We get the delta for each pair in the batch, but don't update the network's weights and biases until after the whole batch is complete.
-            // Because batches do a bulk update, we can run the batches in parallel and lock the _nabla arrays.
+            // We get the delta for each pair in the batch, but don't update the network's weights
+            // and biases until after the whole batch is complete. Because batches do a bulk update,
+            // we can run the batches in parallel and lock the _nabla arrays.
             foreach (Tuple<Vector<double>, Vector<double>> pair in batch)
             {
                 // Item 1 is for biases, item2 for weights

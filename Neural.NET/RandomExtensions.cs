@@ -16,7 +16,10 @@ namespace Neural.NET
         /// <summary>
         /// Shuffles an array of values in O(n) time.
         /// </summary>
-        /// <typeparam name="T">The type of value the array holds. For our net, will likely be an array of tuples, holding two vectors of doubles</typeparam>
+        /// <typeparam name="T">
+        /// The type of value the array holds. For our net, will likely be an array of tuples,
+        /// holding two vectors of doubles
+        /// </typeparam>
         /// <param name="rng">The internal Random class.</param>
         /// <param name="array">The array to shuffle.</param>
         public static void Shuffle<T>(this Random rng, T[] array)
