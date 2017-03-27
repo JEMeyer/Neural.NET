@@ -150,15 +150,11 @@ namespace Neural.NET
         /// </summary>
         public void InitializeNetwork()
         {
-            foreach (ILayerInformation _layerInformation in this.LayerInformation)
+            // The only processing we need to do is on the convolutional layer so just loop through those.
+            foreach (ILayerInformation _layerInformation in this.LayerInformation.Where(p => p.LayerType == LayerType.Convolutional))
             {
-                switch (_layerInformation.LayerType)
-                {
-                    case (LayerType.Convolutional):
-                        ConvolutionalLayerInformation _convInfo = _layerInformation as ConvolutionalLayerInformation;
-                        _convInfo.FlattenedFilters = Matrix<double>.Build.Random(_convInfo.FilterCount, (int)Math.Pow(_convInfo.KernelSize, 2), new Normal(0.0, 1.0));
-                        break;
-                }
+                ConvolutionalLayerInformation _convInfo = _layerInformation as ConvolutionalLayerInformation;
+                _convInfo.FlattenedFilters = Matrix<double>.Build.Random(_convInfo.FilterCount, (int)Math.Pow(_convInfo.KernelSize, 2), new Normal(0.0, 1.0));
             }
         }
 
