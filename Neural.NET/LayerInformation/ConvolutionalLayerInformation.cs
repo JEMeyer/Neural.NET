@@ -21,14 +21,14 @@ namespace Neural.NET.LayerInformation
         public int FilterCount { get; set; }
 
         /// <summary>
+        /// A side length of a filter (all filters are square, if you want a 5x5, set this to 5)
+        /// </summary>
+        public int KernelSize { get; set; }
+
+        /// <summary>
         /// The <see cref="LayerType"/> of this layer.
         /// </summary>
         public LayerType LayerType => LayerType.Convolutional;
-
-        /// <summary>
-        /// A side length of a filter (all filters are square, if you want a 5x5, set this to 5)
-        /// </summary>
-        public int SideLength { get; set; }
 
         /// <summary>
         /// The stride of the filter as it convolves the image

@@ -58,7 +58,7 @@ namespace Neural.NET
             {
                 FilterCount = filterCount,
                 Stride = stride,
-                SideLength = filterDimension
+                KernelSize = filterDimension
             });
         }
 
@@ -104,7 +104,7 @@ namespace Neural.NET
         {
             this.LayerInformation.Add(new PoolingLayerInformation
             {
-                SideLength = poolingDimension,
+                KernelSize = poolingDimension,
                 PoolingType = poolingType,
                 Stride = stride
             });
@@ -156,7 +156,7 @@ namespace Neural.NET
                 {
                     case (LayerType.Convolutional):
                         ConvolutionalLayerInformation _convInfo = _layerInformation as ConvolutionalLayerInformation;
-                        _convInfo.FlattenedFilters = Matrix<double>.Build.Random(_convInfo.FilterCount, (int)Math.Pow(_convInfo.SideLength, 2), new Normal(0.0, 1.0));
+                        _convInfo.FlattenedFilters = Matrix<double>.Build.Random(_convInfo.FilterCount, (int)Math.Pow(_convInfo.KernelSize, 2), new Normal(0.0, 1.0));
                         break;
                 }
             }
@@ -172,19 +172,15 @@ namespace Neural.NET
         /// <returns>A matrix of all the resulting images. Each row is an image.</returns>
         private Matrix<double> Convolute(ConvolutionalLayerInformation layerInfo, Matrix<double> inputImages)
         {
-            Matrix<double> _preConvolutionMap = null;
-            Matrix<double> _outputImages = null;
+            // Flatten all input channels to one image
+            Vector<double> _flattenedInput = inputImages.ColumnSums();
 
-            for (int i = 0; i < inputImages.RowCount; i++)
-            {
-                _preConvolutionMap = this.CreateMaskingMap(layerInfo.SideLength, layerInfo.Stride, inputImages.Row(i));
+            // Create the matrix so we can do all of the convolutions at once.
+            Matrix<double> _preConvolutionMap = this.CreateMaskingMap(layerInfo.KernelSize, layerInfo.Stride, _flattenedInput);
 
-                _outputImages = _outputImages == null ?
-                    _preConvolutionMap :
-                    _outputImages.Stack(_preConvolutionMap);
-            }
-
-            return _outputImages;
+            // Return our filters multiplied by our map. This ends up being every filter passing over
+            // the entire image, and returning a dimentions for each kernel in the layer.
+            return layerInfo.FlattenedFilters.Multiply(_preConvolutionMap);
         }
 
         /// <summary>
@@ -192,7 +188,7 @@ namespace Neural.NET
         /// vector. We do this step so we can do ALL convolutions or pools for an image in one single
         /// computational step.
         /// </summary>
-        /// <param name="filterSideLength">
+        /// <param name="kernelSideLength">
         /// The length of one side of the convolution/pool. All filters are assumed square.
         /// </param>
         /// <param name="strideSize">The stride length that will be used with this map.</param>
@@ -200,26 +196,26 @@ namespace Neural.NET
         /// An images represented as a vector that we are creating the map for.
         /// </param>
         /// <returns></returns>
-        private Matrix<double> CreateMaskingMap(int filterSideLength, int strideSize, Vector<double> startingImage)
+        private Matrix<double> CreateMaskingMap(int kernelSideLength, int strideSize, Vector<double> startingImage)
         {
             int _imageSideDimension = (int)Math.Sqrt(startingImage.Count);
-            int _endingImageSideDimension = (_imageSideDimension - filterSideLength) / strideSize + 1;
-            Matrix<double> _result = CreateMatrix.Dense<double>((int)Math.Pow(filterSideLength, 2), (int)Math.Pow(_endingImageSideDimension, 2));
+            int _endingImageSideDimension = (_imageSideDimension - kernelSideLength) / strideSize + 1;
+            Matrix<double> _result = CreateMatrix.Dense<double>((int)Math.Pow(kernelSideLength, 2), (int)Math.Pow(_endingImageSideDimension, 2));
 
             for (int i = 0; i < _endingImageSideDimension; i += strideSize)
             {
                 for (int j = 0; j < _endingImageSideDimension; j += strideSize)
                 {
                     int _arrayIndex = i * _imageSideDimension + j;
-                    Vector<double> _dataPatch = Vector<double>.Build.Sparse((int)Math.Pow(filterSideLength, 2));
-                    for (int k = 0; k < strideSize; k++)
+                    Vector<double> _dataPatch = Vector<double>.Build.Sparse((int)Math.Pow(kernelSideLength, 2));
+                    for (int k = 0; k < kernelSideLength; k++)
                     {
-                        for (int m = 0; m < filterSideLength; m++)
+                        for (int m = 0; m < kernelSideLength; m++)
                         {
-                            _dataPatch[k * filterSideLength + m] = startingImage[_arrayIndex + m + filterSideLength * k];
+                            _dataPatch[k * kernelSideLength + m] = startingImage[_arrayIndex + m + kernelSideLength * k];
                         }
                     }
-                    _result.SetColumn(j + i * filterSideLength, _dataPatch);
+                    _result.SetColumn(j + i * _endingImageSideDimension, _dataPatch);
                 }
             }
 
@@ -245,6 +241,12 @@ namespace Neural.NET
                 case NonLinearFunction.Tanh:
                     return NonLinearTransformations.Tanh(inputImages);
 
+                case NonLinearFunction.ReLU:
+                    return NonLinearTransformations.ReLU(inputImages);
+
+                case NonLinearFunction.LReLU:
+                    return NonLinearTransformations.LReLU(inputImages);
+
                 default:
                     return null;
             }
@@ -261,11 +263,11 @@ namespace Neural.NET
         private Matrix<double> Pool(PoolingLayerInformation layerInfo, Matrix<double> inputImages)
         {
             Matrix<double> _preConvolutionMap = null;
-            Matrix<double> _outputImages = CreateMatrix.Dense<double>(inputImages.RowCount, (int)Math.Pow((Math.Sqrt(inputImages.ColumnCount) - layerInfo.SideLength) / layerInfo.Stride + 1, 2));
+            Matrix<double> _outputImages = CreateMatrix.Dense<double>(inputImages.RowCount, (int)Math.Pow((Math.Sqrt(inputImages.ColumnCount) - layerInfo.KernelSize) / layerInfo.Stride + 1, 2));
 
             for (int i = 0; i < inputImages.RowCount; i++)
             {
-                _preConvolutionMap = this.CreateMaskingMap(layerInfo.SideLength, layerInfo.Stride, inputImages.Row(i));
+                _preConvolutionMap = this.CreateMaskingMap(layerInfo.KernelSize, layerInfo.Stride, inputImages.Row(i));
 
                 switch (layerInfo.PoolingType)
                 {

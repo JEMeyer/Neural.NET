@@ -12,6 +12,86 @@ namespace Neural.NET
     internal static class NonLinearTransformations
     {
         /// <summary>
+        /// Applies the Leaky ReLU (LReLU) function on all elements. Values greater than 0 stay the
+        /// same. Values smaller become 0.
+        /// </summary>
+        /// <param name="vector">The vector holding the values to run the ReLU operation on.</param>
+        /// <param name="derivative">Whether we want the derivative</param>
+        /// <returns>A vector with the ReLU operation ran on all values.</returns>
+        internal static Vector<double> LReLU(Vector<double> vector, bool derivative = false)
+        {
+            // LReLU is x => x > 0 ? x : .01
+            if (derivative)
+            {
+                return vector.Map((x) => x > 0 ? 1.0 : 0.0, Zeros.Include);
+            }
+            else
+            {
+                return vector.Map((x) => x > 0 ? x : 0.01, Zeros.Include);
+            }
+        }
+
+        /// <summary>
+        /// Applies the Leaky ReLU (LReLU) function on all elements. Values greater than 0 stay the
+        /// same. Values smaller become 0.
+        /// </summary>
+        /// <param name="matrix">The matrix holding the values to run the ReLU operation on.</param>
+        /// <param name="derivative">Whether we want the derivative</param>
+        /// <returns>A matrix with the ReLU operation ran on all values.</returns>
+        internal static Matrix<double> LReLU(Matrix<double> matrix, bool derivative = false)
+        {
+            // LReLU is x => x > 0 ? x : 0
+            if (derivative)
+            {
+                return matrix.Map((x) => x > 0 ? 1.0 : 0.0, Zeros.Include);
+            }
+            else
+            {
+                return matrix.Map((x) => x > 0 ? x : 0.01, Zeros.Include);
+            }
+        }
+
+        /// <summary>
+        /// Applies the ReLU function on all elements. Values greater than 0 stay the same. Values
+        /// smaller become 0.
+        /// </summary>
+        /// <param name="vector">The vector holding the values to run the ReLU operation on.</param>
+        /// <param name="derivative">Whether we want the derivative</param>
+        /// <returns>A vector with the ReLU operation ran on all values.</returns>
+        internal static Vector<double> ReLU(Vector<double> vector, bool derivative = false)
+        {
+            // ReLU is x => x > 0 ? x : 0
+            if (derivative)
+            {
+                return vector.Map((x) => x > 0 ? 1.0 : 0.0, Zeros.Include);
+            }
+            else
+            {
+                return vector.Map((x) => x > 0 ? x : 0, Zeros.Include);
+            }
+        }
+
+        /// <summary>
+        /// Applies the ReLU function on all elements. Values greater than 0 stay the same. Values
+        /// smaller become 0.
+        /// </summary>
+        /// <param name="matrix">The matrix holding the values to run the ReLU operation on.</param>
+        /// <param name="derivative">Whether we want the derivative</param>
+        /// <returns>A matrix with the ReLU operation ran on all values.</returns>
+        internal static Matrix<double> ReLU(Matrix<double> matrix, bool derivative = false)
+        {
+            // ReLU is x => x > 0 ? x : 0
+            if (derivative)
+            {
+                return matrix.Map((x) => x > 0 ? 1.0 : 0.0, Zeros.Include);
+            }
+            else
+            {
+                return matrix.Map((x) => x > 0 ? x : 0.0, Zeros.Include);
+            }
+        }
+
+        /// <summary>
         /// Applies the sigmoid function to all elements of a vector
         /// </summary>
         /// <param name="vector">The vector holding the values to run the sigmoid operation on.</param>

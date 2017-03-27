@@ -24,6 +24,16 @@ namespace Neural.NET.Enums
         /// <summary>
         /// The tanh function is used as the non-linear function
         /// </summary>
-        Tanh = 2
+        Tanh = 2,
+
+        /// <summary>
+        /// The rectified linear unit is used as the non-linear function
+        /// </summary>
+        ReLU = 3,
+
+        /// <summary>
+        /// The leaky rectified linear unit is used as the non-linear function
+        /// </summary>
+        LReLU = 4
     }
 }
