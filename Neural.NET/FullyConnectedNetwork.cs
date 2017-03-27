@@ -16,7 +16,7 @@ namespace Neural.NET
     using Neural.NET.LayerInformation;
 
     /// <summary>
-    /// The class that represents a neural network.
+    /// The class that represents a fully connected neural network.
     /// </summary>
     [Serializable]
     public class FullyConnectedNetwork

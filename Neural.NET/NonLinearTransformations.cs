@@ -9,6 +9,9 @@ namespace Neural.NET
     using System;
     using MathNet.Numerics.LinearAlgebra;
 
+    /// <summary>
+    /// Static class to compute any of the nonlinear functions used in this libaray.
+    /// </summary>
     internal static class NonLinearTransformations
     {
         /// <summary>

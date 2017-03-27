@@ -59,7 +59,8 @@ namespace Neural.NET
             {
                 FilterCount = filterCount,
                 Stride = stride,
-                KernelSize = kernelSize
+                KernelSize = kernelSize,
+                FlattenedFilters = Matrix<double>.Build.Random(filterCount, (int)Math.Pow(kernelSize, 2), new Normal(0.0, 1.0))
             });
         }
 
@@ -138,19 +139,6 @@ namespace Neural.NET
             double[] _fullyConnectedInput = CreateVector.DenseOfEnumerable<double>(_currentImages.EnumerateRows().SelectMany(a => a)).ToArray();
 
             return this.FullyConnectedNetwork.FeedForward(_currentImages.Enumerate().ToArray());
-        }
-
-        /// <summary>
-        /// Uses the staged layer information to initialize the network.
-        /// </summary>
-        public void InitializeNetwork()
-        {
-            // The only processing we need to do is on the convolutional layer so just loop through those.
-            foreach (ILayerInformation _layerInformation in this.LayerInformation.Where(p => p.LayerType == LayerType.Convolutional))
-            {
-                ConvolutionalLayerInformation _convInfo = _layerInformation as ConvolutionalLayerInformation;
-                _convInfo.FlattenedFilters = Matrix<double>.Build.Random(_convInfo.FilterCount, (int)Math.Pow(_convInfo.KernelSize, 2), new Normal(0.0, 1.0));
-            }
         }
 
         /// <summary>
