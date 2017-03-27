@@ -40,7 +40,7 @@ namespace Neural.NET
         /// <returns>A matrix with the ReLU operation ran on all values.</returns>
         internal static Matrix<double> LReLU(Matrix<double> matrix, bool derivative = false)
         {
-            // LReLU is x => x > 0 ? x : 0
+            // LReLU is x => x > 0 ? x : 0.01
             if (derivative)
             {
                 return matrix.Map((x) => x > 0 ? 1.0 : 0.0, Zeros.Include);
