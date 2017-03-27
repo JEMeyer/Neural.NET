@@ -10,6 +10,7 @@ namespace Neural.NET
     using System.Collections.Generic;
     using System.Linq;
     using MathNet.Numerics.LinearAlgebra;
+    using Neural.NET.Enums;
 
     /// <summary>
     /// The class that is used to train a network.
@@ -39,6 +40,7 @@ namespace Neural.NET
         /// <summary>
         /// Train the neural network using mini-batch stochastic gradient descent.
         /// </summary>
+        /// <param name="trainingSize">The number of data to go through each epoch</param>
         /// <param name="trainingData">
         /// A list of tuples "(x, y)" representing the training inputs and the desired outputs.
         /// </param>
@@ -128,7 +130,7 @@ namespace Neural.NET
         /// </summary>
         /// <returns>The propogation.</returns>
         /// <param name="input">Input.</param>
-        /// <param name="output">Output.</param>
+        /// <param name="expectedOutput">Output.</param>
         private Tuple<Vector<double>[], Matrix<double>[]> BackPropogation(Vector<double> input, Vector<double> expectedOutput)
         {
             Vector<double>[] _nablaB = new Vector<double>[this.Network.Biases.Count];
@@ -141,24 +143,24 @@ namespace Neural.NET
             List<Vector<double>> _activations = new List<Vector<double>>(this.Network.LayerCount);
             _activations.Add(_activation);
 
-            // Store all the z vectors (outputs of each layer before running sigmoid)
+            // Store all the z vectors (outputs of each layer before running the activation function)
             List<Vector<double>> _zOutputs = new List<Vector<double>>(this.Network.LayerCount);
 
-            // Loop through all layers, store off values before and after sigmoid function. This is
-            // basically a feed forward run of the network with the values getting stored off for
-            // correction later
+            // Loop through all layers, store off values before and after the activation function
+            // function. This is basically a feed forward run of the network with the values getting
+            // stored off for correction later
             for (int i = 0; i < this.Network.LayerCount; i++)
             {
                 Vector<double> _z = this.Network.Weights[i].Multiply(_activation).Add(this.Network.Biases[i]);
                 _zOutputs.Add(_z);
-                _activation = NonLinearTransformations.Sigmoid(_z);
+                _activation = this.Network.RunActivation(_z, this.Network.LayerInformation[i].ActivationFunction);
                 _activations.Add(_activation);
             }
 
             // Now to run through the network backwards instead of forward in order to do the
             // correction Since activations also holds the very first layer, it actually has
             // layerCount + 1 entries, so last is layercount, second to last is layercount - 1
-            Vector<double> _delta = this.CostDerivative(_activations[this.Network.LayerCount], expectedOutput).PointwiseMultiply(NonLinearTransformations.Sigmoid(_zOutputs.Last(), true));
+            Vector<double> _delta = this.CostDerivative(_activations[this.Network.LayerCount], expectedOutput).PointwiseMultiply(this.Network.RunActivation(_zOutputs.Last(), this.Network.LayerInformation.Last().ActivationFunction, true));
             _nablaB[this.Network.LayerCount - 1] = _delta;
             _nablaW[this.Network.LayerCount - 1] = _delta.ToColumnMatrix().TransposeAndMultiply(_activations[this.Network.LayerCount - 1].ToColumnMatrix());
 
@@ -166,13 +168,13 @@ namespace Neural.NET
             // middle layers
             for (int i = this.Network.LayerCount - 2; i > 0; i--)
             {
-                _delta = this.Network.Weights[i + 1].TransposeThisAndMultiply(_delta).PointwiseMultiply(NonLinearTransformations.Sigmoid(_zOutputs[i], true));
+                _delta = this.Network.Weights[i + 1].TransposeThisAndMultiply(_delta).PointwiseMultiply(this.Network.RunActivation(_zOutputs[i], this.Network.LayerInformation[i].ActivationFunction, true));
                 _nablaB[i] = _delta;
                 _nablaW[i] = _delta.ToColumnMatrix().TransposeAndMultiply(_activations[i].ToColumnMatrix());
             }
 
             // Do last layer
-            _delta = this.Network.Weights[1].TransposeThisAndMultiply(_delta).PointwiseMultiply(NonLinearTransformations.Sigmoid(_zOutputs[0], true));
+            _delta = this.Network.Weights[1].TransposeThisAndMultiply(_delta).PointwiseMultiply(this.Network.RunActivation(_zOutputs[0], this.Network.LayerInformation[0].ActivationFunction, true));
             _nablaB[0] = _delta;
             _nablaW[0] = _delta.ToColumnMatrix().TransposeAndMultiply(_activations[0].ToColumnMatrix());
 
@@ -222,10 +224,11 @@ namespace Neural.NET
         /// <returns>A vector to give to the next layer of the net.</returns>
         private Vector<double> FeedForward(Vector<double> activation)
         {
-            // Take each activation, multiply weights and add bias, then sigmoid it
+            // Take each activation, multiply weights and add bias, then run it through the
+            // activation function
             for (int i = 0; i < this.Network.LayerCount; i++)
             {
-                activation = NonLinearTransformations.Sigmoid(this.Network.Weights[i].Multiply(activation).Add(this.Network.Biases[i]));
+                activation = this.Network.RunActivation(this.Network.Weights[i].Multiply(activation).Add(this.Network.Biases[i]), this.Network.LayerInformation[i].ActivationFunction);
             }
 
             return activation;

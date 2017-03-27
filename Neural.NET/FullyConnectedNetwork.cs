@@ -12,6 +12,8 @@ namespace Neural.NET
     using MathNet.Numerics.Distributions;
     using MathNet.Numerics.LinearAlgebra;
     using MathNet.Numerics.Providers.LinearAlgebra;
+    using Neural.NET.Enums;
+    using Neural.NET.LayerInformation;
 
     /// <summary>
     /// The class that represents a neural network.
@@ -22,53 +24,13 @@ namespace Neural.NET
         /// <summary>
         /// Initializes a new instance of the <see cref="FullyConnectedNetwork"/> class.
         /// </summary>
-        /// <param name="numFeatures">Number of features (input nodes) for the net.</param>
-        /// <param name="numHiddenNodes">
-        /// A <see cref="IReadOnlyList{int}"/> of how many hidden nodes should be in each hidden layer.
-        /// </param>
-        /// <param name="numOutputNodes">How many nodes should be in the output layer.</param>
-        public FullyConnectedNetwork(int numFeatures, IReadOnlyList<int> numHiddenNodes, int numOutputNodes)
+        public FullyConnectedNetwork()
         {
             // Try and use CUDA. If that fails, try MKL. If that fails, try OpenBLAS. If that fails,
             // they get the slow network.
             bool _temp = Control.TryUseNativeCUDA() || Control.TryUseNativeMKL() || Control.TryUseNativeOpenBLAS();
 
-            int _layerCount = numHiddenNodes.Count + 1;
-
-            // Initialize the size of our arrays
-            this.NodesPerLayer = new List<int>(_layerCount + 1);
-            this.Biases = new List<Vector<double>>(_layerCount);
-            this.Weights = new List<Matrix<double>>(_layerCount);
-
-            // Fill our NumberOfNodes array
-            this.NodesPerLayer.Add(numFeatures);
-            for (int i = 1; i < _layerCount; i++)
-            {
-                this.NodesPerLayer.Add(numHiddenNodes[i - 1]);
-            }
-
-            this.NodesPerLayer.Add(numOutputNodes);
-
-            // Need to randomly make a list of vectors for biases and weights. One between each layer.
-            for (int i = 0; i < _layerCount; i++)
-            {
-                this.Biases.Add(Vector<double>.Build.Random(this.NodesPerLayer[i + 1], new Normal(0.0, 1.0)));
-                this.Weights.Add(Matrix<double>.Build.Random(this.NodesPerLayer[i + 1], this.NodesPerLayer[i], new Normal(0.0, 1.0)));
-            }
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="FullyConnectedNetwork"/> class, only
-        /// defining the number of features the network will accept.
-        /// </summary>
-        /// <param name="numFeatures">The number of features (input nodes) for the net.</param>
-        public FullyConnectedNetwork(int numFeatures)
-        {
-            // Try and use CUDA. If that fails, try MKL. If that fails, try OpenBLAS. If that fails,
-            // they get the slow network.
-            bool _temp = Control.TryUseNativeCUDA() || Control.TryUseNativeMKL() || Control.TryUseNativeOpenBLAS();
-
-            this.NodesPerLayer = new List<int>(new[] { numFeatures });
+            this.LayerInformation = new List<FullyConnectedLayerInformation>();
             this.Biases = new List<Vector<double>>();
             this.Weights = new List<Matrix<double>>();
         }
@@ -89,9 +51,9 @@ namespace Neural.NET
         internal int LayerCount => this.Weights.Count;
 
         /// <summary>
-        /// Gets or sets an array that holds how many nodes are in each layer
+        /// Gets or sets an array that holds information defining each layer.
         /// </summary>
-        internal List<int> NodesPerLayer { get; set; }
+        internal List<FullyConnectedLayerInformation> LayerInformation { get; set; }
 
         /// <summary>
         /// Gets or sets the matrix array holding all weights in our network
@@ -102,11 +64,16 @@ namespace Neural.NET
         /// Adds a new layer to the network.
         /// </summary>
         /// <param name="nodeCount">How many nodes that should be in this layer.</param>
-        public void AddLayer(int nodeCount)
+        /// <param name="activationFunction">The activation function to use for this layer.</param>
+        public void AddLayer(int nodeCount, NonLinearFunction activationFunction)
         {
-            this.NodesPerLayer.Add(nodeCount);
+            this.LayerInformation.Add(new FullyConnectedLayerInformation
+            {
+                NodeCount = nodeCount,
+                ActivationFunction = activationFunction
+            });
             this.Biases.Add(Vector<double>.Build.Random(nodeCount, new Normal(0.0, 1.0)));
-            this.Weights.Add(Matrix<double>.Build.Random(nodeCount, this.NodesPerLayer[this.LayerCount], new Normal(0.0, 1.0)));
+            this.Weights.Add(Matrix<double>.Build.Random(nodeCount, this.LayerInformation[this.LayerCount].NodeCount, new Normal(0.0, 1.0)));
         }
 
         /// <summary>
@@ -119,10 +86,38 @@ namespace Neural.NET
             Vector<double> _activation = Vector<double>.Build.DenseOfArray(activation);
             for (int i = 0; i < this.LayerCount; i++)
             {
-                _activation = NonLinearTransformations.Sigmoid(this.Weights[i].Multiply(_activation).Add(this.Biases[i]));
+                _activation = this.RunActivation(this.Weights[i].Multiply(_activation).Add(this.Biases[i]), this.LayerInformation[i].ActivationFunction);
             }
 
             return _activation.ToArray();
+        }
+
+        /// <summary>
+        /// Runs the defines activation function over the given vector.
+        /// </summary>
+        /// <param name="activation">The values for the input layer.</param>
+        /// <param name="activationFunction">The activation function to use.</param>
+        /// <param name="derivative">Whether we want the derivative of the values.</param>
+        /// <returns>A vector to give to the next layer of the net.</returns>
+        internal Vector<double> RunActivation(Vector<double> activation, NonLinearFunction activationFunction, bool derivative = false)
+        {
+            switch (activationFunction)
+            {
+                case NonLinearFunction.Sigmoid:
+                    return NonLinearTransformations.Sigmoid(activation, derivative);
+
+                case NonLinearFunction.Tanh:
+                    return NonLinearTransformations.Tanh(activation, derivative);
+
+                case NonLinearFunction.ReLU:
+                    return NonLinearTransformations.ReLU(activation, derivative);
+
+                case NonLinearFunction.LReLU:
+                    return NonLinearTransformations.LReLU(activation, derivative);
+
+                default:
+                    return null;
+            }
         }
     }
 }

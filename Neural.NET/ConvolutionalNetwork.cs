@@ -31,6 +31,7 @@ namespace Neural.NET
             bool _temp = Control.TryUseNativeCUDA() || Control.TryUseNativeMKL() || Control.TryUseNativeOpenBLAS();
 
             this.LayerInformation = new List<ILayerInformation>();
+            this.FullyConnectedNetwork = new FullyConnectedNetwork();
         }
 
         /// <summary>
@@ -47,18 +48,18 @@ namespace Neural.NET
         /// Adds a convolutional layer to the network.
         /// </summary>
         /// <param name="filterCount">The number of filters this layer should use.</param>
-        /// <param name="filterDimension">
-        /// A side length of a filter (all filters are square, so if you want a 5x5 filter this
+        /// <param name="kernelSize">
+        /// A side length of each kernel (all kernels are square, so if you want a 5x5 kernel this
         /// parameter should be 5)
         /// </param>
         /// <param name="stride">The stride used for the filters.</param>
-        public void AddConvolutionalLayer(int filterCount, int filterDimension, int stride)
+        public void AddConvolutionalLayer(int filterCount, int kernelSize, int stride)
         {
             this.LayerInformation.Add(new ConvolutionalLayerInformation
             {
                 FilterCount = filterCount,
                 Stride = stride,
-                KernelSize = filterDimension
+                KernelSize = kernelSize
             });
         }
 
@@ -67,16 +68,10 @@ namespace Neural.NET
         /// layer is REQUIRED. Once you make a fully connected you cannot add other kinds of layers.
         /// </summary>
         /// <param name="nodeCount">The number of nodes in this fully connected layer.</param>
-        public void AddFullyConnectedLayer(int nodeCount)
+        /// <param name="activationFunction">The activation function to use in this layer.</param>
+        public void AddFullyConnectedLayer(int nodeCount, NonLinearFunction activationFunction = NonLinearFunction.Sigmoid)
         {
-            if (this.FullyConnectedNetwork == null)
-            {
-                this.FullyConnectedNetwork = new FullyConnectedNetwork(nodeCount);
-            }
-            else
-            {
-                this.FullyConnectedNetwork.AddLayer(nodeCount);
-            }
+            this.FullyConnectedNetwork.AddLayer(nodeCount, activationFunction);
         }
 
         /// <summary>
@@ -125,7 +120,7 @@ namespace Neural.NET
                 {
                     case (LayerType.Convolutional):
                         ConvolutionalLayerInformation _convInfo = _layerInformation as ConvolutionalLayerInformation;
-                        _currentImages = this.Convolute(_convInfo, _currentImages);
+                        _currentImages = this.Convolve(_convInfo, _currentImages);
                         break;
 
                     case (LayerType.Pooling):
@@ -166,7 +161,7 @@ namespace Neural.NET
         /// A matrix of all the images that will be convolved. Each row is an image.
         /// </param>
         /// <returns>A matrix of all the resulting images. Each row is an image.</returns>
-        private Matrix<double> Convolute(ConvolutionalLayerInformation layerInfo, Matrix<double> inputImages)
+        private Matrix<double> Convolve(ConvolutionalLayerInformation layerInfo, Matrix<double> inputImages)
         {
             // Flatten all input channels to one image
             Vector<double> _flattenedInput = inputImages.ColumnSums();

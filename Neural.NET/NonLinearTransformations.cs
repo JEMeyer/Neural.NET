@@ -115,7 +115,7 @@ namespace Neural.NET
         /// <summary>
         /// Applies the sigmoid function to all elements of a matrix
         /// </summary>
-        /// <param name="vector">The vector holding the values to run the sigmoid operation on.</param>
+        /// <param name="matrix">The matrix holding the values to run the sigmoid operation on.</param>
         /// <param name="derivative">Whether we want the derivative</param>
         /// <returns>A vector with the sigmoid operation ran on all values.</returns>
         internal static Matrix<double> Sigmoid(Matrix<double> matrix, bool derivative = false)
@@ -155,9 +155,9 @@ namespace Neural.NET
         /// <summary>
         /// Applies the tanh function to all elements of a matrix
         /// </summary>
-        /// <param name="vector">The vector holding the values to run the tanh operation on.</param>
+        /// <param name="matrix">The matrix holding the values to run the tanh operation on.</param>
         /// <param name="derivative">Whether we want the derivative</param>
-        /// <returns>A vector with the tanh operation ran on all values.</returns>
+        /// <returns>A matrix with the tanh operation ran on all values.</returns>
         internal static Matrix<double> Tanh(Matrix<double> matrix, bool derivative = false)
         {
             // Tanh is provided in the libary. The derivative is 1 - tanh(x)^2

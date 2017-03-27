@@ -15,6 +15,11 @@ namespace Neural.NET.LayerInformation
         ILayerInformation
     {
         /// <summary>
+        /// Gets or sets the activation function to use on this layer.
+        /// </summary>
+        public NonLinearFunction ActivationFunction { get; set; }
+
+        /// <summary>
         /// The <see cref="LayerType"/> of this layer
         /// </summary>
         public LayerType LayerType => LayerType.FullyConnected;
