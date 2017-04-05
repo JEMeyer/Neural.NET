@@ -72,8 +72,11 @@ namespace Neural.NET
                 NodeCount = nodeCount,
                 ActivationFunction = activationFunction
             });
-            this.Biases.Add(Vector<double>.Build.Random(nodeCount, new Normal(0.0, 1.0)));
-            this.Weights.Add(Matrix<double>.Build.Random(nodeCount, this.LayerInformation[this.LayerCount].NodeCount, new Normal(0.0, 1.0)));
+            if (this.LayerInformation.Count > 1)
+            {
+                this.Biases.Add(Vector<double>.Build.Random(nodeCount, new Normal(0.0, 1.0)));
+                this.Weights.Add(Matrix<double>.Build.Random(nodeCount, this.LayerInformation[this.LayerCount].NodeCount, new Normal(0.0, 1.0)));
+            }
         }
 
         /// <summary>

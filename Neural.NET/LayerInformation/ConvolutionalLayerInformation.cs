@@ -8,6 +8,7 @@ namespace Neural.NET.LayerInformation
 {
     using MathNet.Numerics.LinearAlgebra;
     using Neural.NET.Enums;
+    using System.Collections.Generic;
 
     /// <summary>
     /// Defines the information that a convolutional layer needs to operate
@@ -38,6 +39,6 @@ namespace Neural.NET.LayerInformation
         /// <summary>
         /// A matrix of all filters used in this layer
         /// </summary>
-        internal Matrix<double> FlattenedFilters { get; set; }
+        internal List<Matrix<double>> FlattenedFilters { get; set; }
     }
 }

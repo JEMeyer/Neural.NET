@@ -24,7 +24,7 @@ namespace Neural.NET
         /// Constructs a new instance of the <see cref="ConvolutionalNetwork"/> class, only defining
         /// the number of features the network will accept.
         /// </summary>
-        public ConvolutionalNetwork()
+        public ConvolutionalNetwork(int inputDimensions)
         {
             // Try and use CUDA. If that fails, try MKL. If that fails, try OpenBLAS. If that fails,
             // they get the slow network.
@@ -32,17 +32,23 @@ namespace Neural.NET
 
             this.LayerInformation = new List<ILayerInformation>();
             this.FullyConnectedNetwork = new FullyConnectedNetwork();
+            this.InputDimensions = inputDimensions;
         }
 
         /// <summary>
         /// Gets or sets the fully connected network
         /// </summary>
-        private FullyConnectedNetwork FullyConnectedNetwork { get; set; }
+        internal FullyConnectedNetwork FullyConnectedNetwork { get; set; }
 
         /// <summary>
         /// Gets or sets the layer information for each layer in the network
         /// </summary>
-        private List<ILayerInformation> LayerInformation { get; set; }
+        internal List<ILayerInformation> LayerInformation { get; set; }
+
+        /// <summary>
+        /// How many dimensions the input image will have. 1 for grayscale, 3 for RGB, etc.
+        /// </summary>
+        private int InputDimensions { get; set; }
 
         /// <summary>
         /// Adds a convolutional layer to the network.
@@ -55,12 +61,20 @@ namespace Neural.NET
         /// <param name="stride">The stride used for the filters.</param>
         public void AddConvolutionalLayer(int filterCount, int kernelSize, int stride)
         {
+            ConvolutionalLayerInformation _previousConvolutionLayer = this.LayerInformation.LastOrDefault(p => p.LayerType == LayerType.Convolutional) as ConvolutionalLayerInformation;
+            int _previousDimensions = _previousConvolutionLayer == null ? this.InputDimensions : _previousConvolutionLayer.FilterCount;
+            List<Matrix<double>> _flattenedFilters = new List<Matrix<double>>(filterCount);
+            for (int i = 0; i < filterCount; i++)
+            {
+                _flattenedFilters.Add(Matrix<double>.Build.Random(_previousDimensions, (int)Math.Pow(kernelSize, 2), new Normal(0.0, 1.0)));
+            }
+
             this.LayerInformation.Add(new ConvolutionalLayerInformation
             {
                 FilterCount = filterCount,
                 Stride = stride,
                 KernelSize = kernelSize,
-                FlattenedFilters = Matrix<double>.Build.Random(filterCount, (int)Math.Pow(kernelSize, 2), new Normal(0.0, 1.0))
+                FlattenedFilters = _flattenedFilters
             });
         }
 
@@ -149,17 +163,36 @@ namespace Neural.NET
         /// A matrix of all the images that will be convolved. Each row is an image.
         /// </param>
         /// <returns>A matrix of all the resulting images. Each row is an image.</returns>
-        private Matrix<double> Convolve(ConvolutionalLayerInformation layerInfo, Matrix<double> inputImages)
+        internal Matrix<double> Convolve(ConvolutionalLayerInformation layerInfo, Matrix<double> inputImages)
         {
-            // Flatten all input channels to one image
-            Vector<double> _flattenedInput = inputImages.ColumnSums();
+            // Construct out return matrix that will include all layers of our images.
+            Matrix<double> _outputImages = null;
 
-            // Create the matrix so we can do all of the convolutions at once.
-            Matrix<double> _preConvolutionMap = this.CreateMaskingMap(layerInfo.KernelSize, layerInfo.Stride, _flattenedInput);
+            foreach (Tuple<int, Vector<double>> _imageDimensionAndIndex in inputImages.EnumerateRowsIndexed())
+            {
+                // Create the matrix so we can do all of the convolutions at once.
+                Matrix<double> _preConvolutionMap = this.CreateMaskingMap(layerInfo.KernelSize, layerInfo.Stride, _imageDimensionAndIndex.Item2);
 
-            // Return our filters multiplied by our map. This ends up being every filter passing over
-            // the entire image, and returning a dimentions for each kernel in the layer.
-            return layerInfo.FlattenedFilters.Multiply(_preConvolutionMap);
+                Matrix<double> _filtersForThisDimension = CreateMatrix.Dense<double>(layerInfo.FlattenedFilters.Count, layerInfo.FlattenedFilters[0].ColumnCount);
+
+                foreach (Matrix<double> _filter in layerInfo.FlattenedFilters)
+                {
+                    _filtersForThisDimension.InsertRow(_imageDimensionAndIndex.Item1, _filter.Row(_imageDimensionAndIndex.Item1));
+                }
+
+                // Create the result image matrix if it's not created yet
+                if (_outputImages == null)
+                {
+                    _outputImages = CreateMatrix.Dense<double>(layerInfo.FilterCount, _preConvolutionMap.ColumnCount, 0.0);
+                }
+
+                // Store off the result of our filters multiplied by our map. This ends up being every filter passing over
+                // the entire image, and returning a dimentions for each kernel in the layer. We sum all the dimensional results in one dimension.
+                _outputImages = _outputImages.Add(_filtersForThisDimension.Multiply(_preConvolutionMap));
+            }
+            
+            // Return all the resulting dimensions of the images after convolution
+            return _outputImages;
         }
 
         /// <summary>
@@ -175,7 +208,7 @@ namespace Neural.NET
         /// An images represented as a vector that we are creating the map for.
         /// </param>
         /// <returns></returns>
-        private Matrix<double> CreateMaskingMap(int kernelSideLength, int strideSize, Vector<double> startingImage)
+        internal Matrix<double> CreateMaskingMap(int kernelSideLength, int strideSize, Vector<double> startingImage)
         {
             int _imageSideDimension = (int)Math.Sqrt(startingImage.Count);
             int _endingImageSideDimension = (_imageSideDimension - kernelSideLength) / strideSize + 1;
@@ -210,7 +243,7 @@ namespace Neural.NET
         /// an image.
         /// </param>
         /// <returns>A matrix of all the resulting images. Each row is an image.</returns>
-        private Matrix<double> NonLinear(NonLinearLayerInformation layerInfo, Matrix<double> inputImages)
+        internal Matrix<double> NonLinear(NonLinearLayerInformation layerInfo, Matrix<double> inputImages)
         {
             switch (layerInfo.NonLinearFunction)
             {
@@ -239,7 +272,7 @@ namespace Neural.NET
         /// A matrix of all the images that will be pooled. Each row is an image.
         /// </param>
         /// <returns>A matrix of all the resulting images. Each row is an image.</returns>
-        private Matrix<double> Pool(PoolingLayerInformation layerInfo, Matrix<double> inputImages)
+        internal Matrix<double> Pool(PoolingLayerInformation layerInfo, Matrix<double> inputImages)
         {
             Matrix<double> _preConvolutionMap = null;
             Matrix<double> _outputImages = CreateMatrix.Dense<double>(inputImages.RowCount, (int)Math.Pow((Math.Sqrt(inputImages.ColumnCount) - layerInfo.KernelSize) / layerInfo.Stride + 1, 2));
