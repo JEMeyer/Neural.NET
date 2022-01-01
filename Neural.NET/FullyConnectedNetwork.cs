@@ -38,7 +38,7 @@ namespace Neural.NET
         /// <summary>
         /// Gets the current provider so the user can check to see which one the network decided to use.
         /// </summary>
-        public ILinearAlgebraProvider Provider => Control.LinearAlgebraProvider;
+        public ILinearAlgebraProvider Provider => LinearAlgebraControl.Provider;
 
         /// <summary>
         /// Gets or sets the vector array holding all biases in our network

@@ -4,6 +4,8 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+using System.Numerics;
+
 namespace Neural.NET
 {
     using System;
