@@ -11,6 +11,7 @@ namespace Neural.NET.LayerInformation
     /// <summary>
     /// All of the information needed for a fully connected layer to be properly defined
     /// </summary>
+    [Serializable]
     internal class FullyConnectedLayerInformation :
         ILayerInformation
     {

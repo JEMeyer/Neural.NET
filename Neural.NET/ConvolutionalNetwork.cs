@@ -18,6 +18,7 @@ namespace Neural.NET
     /// <summary>
     /// Class the defines a convolutional network.
     /// </summary>
+    [Serializable]
     public class ConvolutionalNetwork
     {
         /// <summary>

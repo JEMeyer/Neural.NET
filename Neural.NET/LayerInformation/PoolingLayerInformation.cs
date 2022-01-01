@@ -11,6 +11,7 @@ namespace Neural.NET.LayerInformation
     /// <summary>
     /// All of the information needed to make a pooling layer.
     /// </summary>
+    [Serializable]
     internal class PoolingLayerInformation :
         ILayerInformation
     {
