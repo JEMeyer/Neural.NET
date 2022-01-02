@@ -4,18 +4,17 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace Neural.NET.LayerInformation
-{
-    using Neural.NET.Enums;
+using Neural.NET.Enums;
 
+namespace Neural.NET.LayerInformation;
+
+/// <summary>
+///     Defines a contract for anything claiming to be layer information
+/// </summary>
+internal interface ILayerInformation
+{
     /// <summary>
-    /// Defines a contract for anything claiming to be layer information
+    ///     The type of layer the information is for
     /// </summary>
-    internal interface ILayerInformation
-    {
-        /// <summary>
-        /// The type of layer the information is for
-        /// </summary>
-        LayerType LayerType { get; }
-    }
+    LayerType LayerType { get; }
 }

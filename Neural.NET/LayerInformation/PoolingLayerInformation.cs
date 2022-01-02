@@ -4,36 +4,35 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace Neural.NET.LayerInformation
+using Neural.NET.Enums;
+
+namespace Neural.NET.LayerInformation;
+
+/// <summary>
+///     All of the information needed to make a pooling layer.
+/// </summary>
+[Serializable]
+internal class PoolingLayerInformation :
+    ILayerInformation
 {
-    using Neural.NET.Enums;
+    /// <summary>
+    ///     A side length of a pool (all pools are square, if you want 5x5 pooling this value should
+    ///     be 5)
+    /// </summary>
+    public int KernelSize { get; set; }
 
     /// <summary>
-    /// All of the information needed to make a pooling layer.
+    ///     The type of pooling to use for each pool.
     /// </summary>
-    [Serializable]
-    internal class PoolingLayerInformation :
-        ILayerInformation
-    {
-        /// <summary>
-        /// A side length of a pool (all pools are square, if you want 5x5 pooling this value should
-        /// be 5)
-        /// </summary>
-        public int KernelSize { get; set; }
+    public PoolingType PoolingType { get; set; }
 
-        /// <summary>
-        /// The <see cref="LayerType"/> for this layer.
-        /// </summary>
-        public LayerType LayerType => LayerType.Pooling;
+    /// <summary>
+    ///     The stride the pool should move.
+    /// </summary>
+    public int Stride { get; set; }
 
-        /// <summary>
-        /// The type of pooling to use for each pool.
-        /// </summary>
-        public PoolingType PoolingType { get; set; }
-
-        /// <summary>
-        /// The stride the pool should move.
-        /// </summary>
-        public int Stride { get; set; }
-    }
+    /// <summary>
+    ///     The <see cref="LayerType" /> for this layer.
+    /// </summary>
+    public LayerType LayerType => LayerType.Pooling;
 }

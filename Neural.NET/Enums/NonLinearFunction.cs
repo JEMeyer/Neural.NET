@@ -4,36 +4,35 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace Neural.NET.Enums
+namespace Neural.NET.Enums;
+
+/// <summary>
+///     An enum that defines what non-linear function is desired
+/// </summary>
+public enum NonLinearFunction
 {
     /// <summary>
-    /// An enum that defines what non-linear function is desired
+    ///     Default value
     /// </summary>
-    public enum NonLinearFunction
-    {
-        /// <summary>
-        /// Default value
-        /// </summary>
-        Undefined = 0,
+    Undefined = 0,
 
-        /// <summary>
-        /// The sigmoid function is used as the non-linear function
-        /// </summary>
-        Sigmoid = 1,
+    /// <summary>
+    ///     The sigmoid function is used as the non-linear function
+    /// </summary>
+    Sigmoid = 1,
 
-        /// <summary>
-        /// The tanh function is used as the non-linear function
-        /// </summary>
-        Tanh = 2,
+    /// <summary>
+    ///     The tanh function is used as the non-linear function
+    /// </summary>
+    Tanh = 2,
 
-        /// <summary>
-        /// The rectified linear unit is used as the non-linear function
-        /// </summary>
-        ReLU = 3,
+    /// <summary>
+    ///     The rectified linear unit is used as the non-linear function
+    /// </summary>
+    ReLU = 3,
 
-        /// <summary>
-        /// The leaky rectified linear unit is used as the non-linear function
-        /// </summary>
-        LReLU = 4
-    }
+    /// <summary>
+    ///     The leaky rectified linear unit is used as the non-linear function
+    /// </summary>
+    LReLU = 4,
 }

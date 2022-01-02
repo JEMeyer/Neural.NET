@@ -4,30 +4,29 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace Neural.NET.LayerInformation
+using Neural.NET.Enums;
+
+namespace Neural.NET.LayerInformation;
+
+/// <summary>
+///     All of the information needed for a fully connected layer to be properly defined
+/// </summary>
+[Serializable]
+internal class FullyConnectedLayerInformation :
+    ILayerInformation
 {
-    using Neural.NET.Enums;
+    /// <summary>
+    ///     Gets or sets the activation function to use on this layer.
+    /// </summary>
+    public NonLinearFunction ActivationFunction { get; set; }
 
     /// <summary>
-    /// All of the information needed for a fully connected layer to be properly defined
+    ///     The number of nodes in this layer
     /// </summary>
-    [Serializable]
-    internal class FullyConnectedLayerInformation :
-        ILayerInformation
-    {
-        /// <summary>
-        /// Gets or sets the activation function to use on this layer.
-        /// </summary>
-        public NonLinearFunction ActivationFunction { get; set; }
+    public int NodeCount { get; set; }
 
-        /// <summary>
-        /// The <see cref="LayerType"/> of this layer
-        /// </summary>
-        public LayerType LayerType => LayerType.FullyConnected;
-
-        /// <summary>
-        /// The number of nodes in this layer
-        /// </summary>
-        public int NodeCount { get; set; }
-    }
+    /// <summary>
+    ///     The <see cref="LayerType" /> of this layer
+    /// </summary>
+    public LayerType LayerType => LayerType.FullyConnected;
 }

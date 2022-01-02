@@ -4,21 +4,20 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace Neural.NET.Enums
+namespace Neural.NET.Enums;
+
+/// <summary>
+///     An enum for the type of pooling the user desires
+/// </summary>
+public enum PoolingType
 {
     /// <summary>
-    /// An enum for the type of pooling the user desires
+    ///     Default value
     /// </summary>
-    public enum PoolingType
-    {
-        /// <summary>
-        /// Default value
-        /// </summary>
-        Undefined = 0,
+    Undefined = 0,
 
-        /// <summary>
-        /// In each given patch, take the largest value
-        /// </summary>
-        MaxPooling = 1
-    }
+    /// <summary>
+    ///     In each given patch, take the largest value
+    /// </summary>
+    MaxPooling = 1,
 }

@@ -4,25 +4,24 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace Neural.NET.LayerInformation
+using Neural.NET.Enums;
+
+namespace Neural.NET.LayerInformation;
+
+/// <summary>
+///     Defines all information needed to use a non-linear layer.
+/// </summary>
+[Serializable]
+internal class NonLinearLayerInformation :
+    ILayerInformation
 {
-    using Neural.NET.Enums;
+    /// <summary>
+    ///     The non-linear function to use in this layer.
+    /// </summary>
+    public NonLinearFunction NonLinearFunction { get; set; }
 
     /// <summary>
-    /// Defines all information needed to use a non-linear layer.
+    ///     The <see cref="LayerType" /> of this layer.
     /// </summary>
-    [Serializable]
-    internal class NonLinearLayerInformation :
-        ILayerInformation
-    {
-        /// <summary>
-        /// The <see cref="LayerType"/> of this layer.
-        /// </summary>
-        public LayerType LayerType => LayerType.NonLinear;
-
-        /// <summary>
-        /// The non-linear function to use in this layer.
-        /// </summary>
-        public NonLinearFunction NonLinearFunction { get; set; }
-    }
+    public LayerType LayerType => LayerType.NonLinear;
 }
