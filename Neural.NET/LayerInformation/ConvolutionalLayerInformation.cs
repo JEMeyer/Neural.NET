@@ -13,6 +13,7 @@ namespace Neural.NET.LayerInformation
     /// <summary>
     /// Defines the information that a convolutional layer needs to operate
     /// </summary>
+    [Serializable]
     internal class ConvolutionalLayerInformation :
         ILayerInformation
     {

@@ -11,6 +11,7 @@ namespace Neural.NET.LayerInformation
     /// <summary>
     /// Defines all information needed to use a non-linear layer.
     /// </summary>
+    [Serializable]
     internal class NonLinearLayerInformation :
         ILayerInformation
     {
